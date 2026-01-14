@@ -3,8 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Base
 Bundle-SymbolicName: tw.idempiere.base
 Bundle-Version: 1.0.0.qualifier
-Fragment-Host: org.adempiere.base;bundle-version="11.0.0"
-Service-Component: OSGI-INF/tw.idempiere.base.model.factory.xml
+Fragment-Host: org.adempiere.base
+Service-Component: OSGI-INF/tw.idempiere.base.model.factory.xml,
+ OSGI-INF/tw.idempiere.base.process.factory.xml
 Automatic-Module-Name: tw.idempiere.base
 Bundle-ClassPath: src/,
  .
