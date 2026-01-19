@@ -155,21 +155,20 @@ public class ImportCustomsRate extends SvrProcess {
                     rateVal = BigDecimal.ONE.divide(rateVal, 12, RoundingMode.HALF_UP);
                 }
 
-                // Expand Date Range
+                // Clean timestamps
                 Calendar current = Calendar.getInstance();
                 current.setTime(startTs);
                 cleanTime(current);
+                Timestamp validFrom = new Timestamp(current.getTimeInMillis());
 
                 Calendar end = Calendar.getInstance();
                 end.setTime(endTs);
                 cleanTime(end);
+                Timestamp validTo = new Timestamp(end.getTimeInMillis());
 
-                while (!current.after(end)) {
-                    Timestamp validFrom = new Timestamp(current.getTimeInMillis());
-                    saveRate(c_Currency_ID_From, c_Currency_ID_To, c_ConversionType_ID, validFrom, rateVal, ad_Org_ID);
-                    count++;
-                    current.add(Calendar.DATE, 1);
-                }
+                saveRate(c_Currency_ID_From, c_Currency_ID_To, c_ConversionType_ID, validFrom, validTo, rateVal,
+                        ad_Org_ID);
+                count++;
 
                 // Update DateLastRun to NOW
                 DB.executeUpdate("UPDATE TW_ExchangeRatePair SET DateLastRun=? WHERE TW_ExchangeRatePair_ID=?",
@@ -182,7 +181,7 @@ public class ImportCustomsRate extends SvrProcess {
             DB.close(rs, pstmt);
         }
 
-        return "Processed " + pairCount + " pairs, " + count + " rates updates. Period: " + rateData.start + "-"
+        return "Processed " + pairCount + " pairs, " + count + " rates records updated. Period: " + rateData.start + "-"
                 + rateData.end;
     }
 
@@ -194,6 +193,7 @@ public class ImportCustomsRate extends SvrProcess {
     }
 
     private void saveRate(int c_Currency_ID_From, int c_Currency_ID_To, int c_ConversionType_ID, Timestamp validFrom,
+            Timestamp validTo,
             BigDecimal rate, int ad_Org_ID) {
 
         // Check if rate exists
@@ -211,10 +211,10 @@ public class ImportCustomsRate extends SvrProcess {
             conversionRate.setC_Currency_ID_To(c_Currency_ID_To);
             conversionRate.setC_ConversionType_ID(c_ConversionType_ID);
             conversionRate.setValidFrom(validFrom);
-            conversionRate.setValidTo(validFrom);
         }
 
-        // Always update the rate
+        // Update range and rate
+        conversionRate.setValidTo(validTo);
         conversionRate.setMultiplyRate(rate);
         conversionRate.setDivideRate(BigDecimal.ONE.divide(rate, 12, RoundingMode.HALF_UP));
         conversionRate.saveEx();
