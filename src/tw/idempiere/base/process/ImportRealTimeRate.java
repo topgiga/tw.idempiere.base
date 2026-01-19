@@ -51,11 +51,11 @@ public class ImportRealTimeRate extends SvrProcess {
         Map<String, BigDecimal> rateMap = parseCSV(csvData);
 
         // 3. Get Active Pairs
-        String sql = "SELECT p.TW_ExchangeRatePair_ID, p.C_Currency_ID_From, p.C_Currency_ID_To, " +
+        String sql = "SELECT p.TW_ExchangeRatePair_ID, p.C_Currency_ID, p.C_Currency_ID_To, " +
                 "p.C_ConversionType_ID, p.API_Key, p.IsInverse, p.AD_Org_ID, p.DateLastRun, " +
                 "cf.ISO_Code as ISO_From, ct.ISO_Code as ISO_To " +
                 "FROM TW_ExchangeRatePair p " +
-                "INNER JOIN C_Currency cf ON p.C_Currency_ID_From = cf.C_Currency_ID " +
+                "INNER JOIN C_Currency cf ON p.C_Currency_ID = cf.C_Currency_ID " +
                 "INNER JOIN C_Currency ct ON p.C_Currency_ID_To = ct.C_Currency_ID " +
                 "WHERE p.IsActive='Y' AND p.AD_Client_ID=?";
 
@@ -70,7 +70,7 @@ public class ImportRealTimeRate extends SvrProcess {
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 int tw_ExchangeRatePair_ID = rs.getInt("TW_ExchangeRatePair_ID");
-                int c_Currency_ID_From = rs.getInt("C_Currency_ID_From");
+                int c_Currency_ID_From = rs.getInt("C_Currency_ID");
                 int c_Currency_ID_To = rs.getInt("C_Currency_ID_To");
                 int c_ConversionType_ID = rs.getInt("C_ConversionType_ID");
                 // boolean isInverse = "Y".equals(rs.getString("IsInverse")); // Logic inferred
