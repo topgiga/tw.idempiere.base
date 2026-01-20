@@ -65,9 +65,13 @@ The process `ImportCustomsRate` can be:
 3.  **Update Loop**:
     - Queries active `TW_ExchangeRatePair`.
     - Matches the Currency Code.
-    - Determines if it's Buy or Sell based on relation to TWD.
-        - **Foreign->TWD**: Use `buyValue`.
-        - **TWD->Foreign**: Use `sellValue` (Inverted: `1 / sellValue`).
+    - **Determine Rate**:
+        - Checks `IsSOTrx` column in `TW_ExchangeRatePair`.
+        - If `'Y'` (Sales/Receipt): Uses `buyValue`.
+        - If `'N'` (Purchase/Payment): Uses `sellValue`.
+    - **Determine Direction**:
+        - **Foreign->TWD**: Normal rate.
+        - **TWD->Foreign**: Inverted rate (`1 / rate`).
     - **Upsert Rate**:
         - Searches for existing `C_Conversion_Rate` matching the keys + `ValidFrom`.
         - Updates `ValidTo` to the end of the period.

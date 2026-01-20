@@ -67,7 +67,7 @@ public class ImportCustomsRate extends SvrProcess {
     private String updateRates(CustomsRateData rateData) throws Exception {
         // Query Active Pairs that need updates
         String sql = "SELECT p.TW_ExchangeRatePair_ID, p.C_Currency_ID, p.C_Currency_ID_To, " +
-                "p.C_ConversionType_ID, p.AD_Org_ID, " +
+                "p.C_ConversionType_ID, p.AD_Org_ID, p.IsSOTrx, " +
                 "cf.ISO_Code as ISO_From, ct.ISO_Code as ISO_To " +
                 "FROM TW_ExchangeRatePair p " +
                 "INNER JOIN C_Currency cf ON p.C_Currency_ID = cf.C_Currency_ID " +
@@ -100,6 +100,7 @@ public class ImportCustomsRate extends SvrProcess {
                 int c_Currency_ID_To = rs.getInt("C_Currency_ID_To");
                 int c_ConversionType_ID = rs.getInt("C_ConversionType_ID");
                 int ad_Org_ID = rs.getInt("AD_Org_ID");
+                String isSOTrx = rs.getString("IsSOTrx");
                 String isoFrom = rs.getString("ISO_From");
                 String isoTo = rs.getString("ISO_To");
 
@@ -108,13 +109,11 @@ public class ImportCustomsRate extends SvrProcess {
 
                 // Determine Direction
                 if ("TWD".equals(isoTo)) {
-                    // Foreign -> TWD (Import/Buy logic?)
-                    // Requirement: Foreign -> TWD uses "Buy Value"
+                    // Foreign -> TWD
                     lookupCode = isoFrom;
                     invert = false;
                 } else if ("TWD".equals(isoFrom)) {
-                    // TWD -> Foreign (Export/Sell logic?)
-                    // Requirement: TWD -> Foreign uses "Sell Value" (inverted later)
+                    // TWD -> Foreign
                     lookupCode = isoTo;
                     invert = true;
                 } else {
@@ -130,18 +129,13 @@ public class ImportCustomsRate extends SvrProcess {
                 }
 
                 BigDecimal rateVal;
-                if (!invert) {
-                    // Foreign -> TWD: Use Buy Value
+                // Use IsSOTrx to determine Buy(N) or Sell(Y) logic, or strictly following
+                // requirement:
+                // issotrx = 'Y' -> Buy Value
+                // issotrx = 'N' -> Sell Value
+                if ("Y".equals(isSOTrx)) {
                     rateVal = item.buyValue;
                 } else {
-                    // TWD -> Foreign: Use Sell Value (and invert it because rate is TWD per
-                    // Foreign)
-                    // The table gives Rate = TWD / Foreign (e.g. USD = 32 TWD)
-                    // We want TWD -> Foreign, so we need Foreign / TWD = 1 / SellValue
-                    // Wait, let's verify logic.
-                    // To convert TWD to USD, we divide by the Sell Rate (Bank Sells USD to us).
-                    // Rate in DB for TWD->USD is typically 0.03125 (1/32).
-                    // So yes, we use Sell Value and Invert.
                     rateVal = item.sellValue;
                 }
 
@@ -216,7 +210,7 @@ public class ImportCustomsRate extends SvrProcess {
         // Update range and rate
         conversionRate.setValidTo(validTo);
         conversionRate.setMultiplyRate(rate);
-        conversionRate.setDivideRate(BigDecimal.ONE.divide(rate, 12, RoundingMode.HALF_UP));
+        //conversionRate.setDivideRate(BigDecimal.ONE.divide(rate, 12, RoundingMode.HALF_UP));
         conversionRate.saveEx();
     }
 
