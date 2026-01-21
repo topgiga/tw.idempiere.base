@@ -3,6 +3,7 @@ package tw.idempiere.base.factories;
 import java.sql.ResultSet;
 
 import org.adempiere.base.IModelFactory;
+import org.compiere.model.MTGUserPermission;
 import org.compiere.model.MWorkflowAbstractMessage;
 import org.compiere.model.PO;
 import org.compiere.util.Env;
@@ -13,6 +14,8 @@ public class TaiwanModelFactory implements IModelFactory {
 	public Class<?> getClass(String tableName) {
 		if (tableName.equals(MWorkflowAbstractMessage.Table_Name))
 			return MWorkflowAbstractMessage.class;
+		if (tableName.equals(MTGUserPermission.Table_Name))
+			return MTGUserPermission.class;
 
 		return null;
 	}
@@ -21,6 +24,8 @@ public class TaiwanModelFactory implements IModelFactory {
 	public PO getPO(String tableName, int Record_ID, String trxName) {
 		if (tableName.equals(MWorkflowAbstractMessage.Table_Name))
 			return new MWorkflowAbstractMessage(Env.getCtx(), Record_ID, trxName);
+		if (tableName.equals(MTGUserPermission.Table_Name))
+			return new MTGUserPermission(Env.getCtx(), Record_ID, trxName);
 
 		return null;
 	}
@@ -29,6 +34,8 @@ public class TaiwanModelFactory implements IModelFactory {
 	public PO getPO(String tableName, ResultSet rs, String trxName) {
 		if (tableName.equals(MWorkflowAbstractMessage.Table_Name))
 			return new MWorkflowAbstractMessage(Env.getCtx(), rs, trxName);
+		if (tableName.equals(MTGUserPermission.Table_Name))
+			return new MTGUserPermission(Env.getCtx(), rs, trxName);
 
 		return null;
 	}
