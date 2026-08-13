@@ -3,6 +3,7 @@ package tw.idempiere.base.factories;
 import org.adempiere.base.IProcessFactory;
 import org.compiere.process.ProcessCall;
 
+import tw.idempiere.base.process.AbortInvalidActivity;
 import tw.idempiere.base.process.ImportCustomsRate;
 import tw.idempiere.base.process.ImportRealTimeRate;
 
@@ -15,6 +16,8 @@ public class TaiwanProcessFactory implements IProcessFactory {
             return new ImportRealTimeRate();
         if (className.equals(ImportCustomsRate.class.getName()))
             return new ImportCustomsRate();
+        if (className.equals(AbortInvalidActivity.class.getName()))
+            return new AbortInvalidActivity();
 
         return null;
     }
