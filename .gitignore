@@ -1,1 +1,17 @@
-/target/
+# Build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE
+.project
+.settings/
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
